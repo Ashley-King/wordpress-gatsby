@@ -13,6 +13,14 @@ module.exports = {
         path: `${__dirname}/src/images`,
       },
     },
+    {
+      resolve: `gatsby-source-graphql`,
+      options: {
+        typeName: `WPGraphql`,
+        fieldName: `wpgraphql`,
+        url: `http://local.gatsby/graphql`,
+      },
+    },
     `gatsby-transformer-sharp`,
     `gatsby-plugin-sharp`,
     {
