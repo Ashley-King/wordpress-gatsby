@@ -4,15 +4,13 @@ const path = require('path')
 
 module.exports = async({actions, graphql}) => {
     //set up query
-    const GET_PAGES = `
-        query GET_PAGES($first: Int $after: String){
+    const GET_POSTS = `
+        query GET_POSTS($first: Int $after: String){
             wpgraphql {
-                pages(
+                posts(
                     first: $first
                     after: $after
-                    where:{
-                        parent: null
-                    }
+                    
                 ){
                     pageInfo{
                         endCursor
@@ -22,7 +20,7 @@ module.exports = async({actions, graphql}) => {
                         id
                         uri
                         slug
-                        pageId
+                        postId
                         title
                     }
                 }
@@ -33,13 +31,13 @@ module.exports = async({actions, graphql}) => {
     
         const {createPage} = actions
       
-        const allPages = []
+        const allPosts = []
 
         const fetchPages = async variables => 
-            await graphql(GET_PAGES, variables).then(({data}) => {
+            await graphql(GET_POSTS, variables).then(({data}) => {
                 const {
                     wpgraphql:{
-                        pages: {
+                        posts: {
                             nodes,
                             pageInfo: {
                                 hasNextPage, endCursor
@@ -48,28 +46,28 @@ module.exports = async({actions, graphql}) => {
                     }
                 } = data
                
-                nodes.map(page => {
-                    allPages.push(page)
+                nodes.map(post => {
+                    allPosts.push(post)
                 })
                 if(hasNextPage){
                     return fetchPages({first: variables.first, after: endCursor})
                 }
-                return allPages
+                return allPosts
             });
 
 
      //map over pages and call gatsby createPage
-            await fetchPages({first: 100, after: null}).then(allPages => {
-                const pageTemplate = path.resolve('./src/templates/page.js')
+            await fetchPages({first: 100, after: null}).then(allPosts => {
+                const postTemplate = path.resolve('./src/templates/post.js')
                 //map over all pages you pushed to array
-                allPages.map(page => {
-                    console.log(`create page: ${page.uri}`)
+                allPosts.map(post => {
+                    console.log(`create post: ${post.uri}`)
                     
 
                     createPage({
-                        path: page.uri,
-                        component: pageTemplate,
-                        context: page,
+                        path: post.uri,
+                        component: postTemplate,
+                        context: post,
                     })
                 })
             })
